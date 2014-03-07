@@ -92,7 +92,7 @@ extern "C" int APIENTRY DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID)
 void
 initApp()
 {
-    ACHAR buf[1024] = { 0 };
+    ACHAR buf[MAX_PATH] = { 0 };
 
     GetModuleFileName(_hdllInstance, buf, 1024);
 
@@ -111,6 +111,19 @@ initApp()
         ACRX_T("FPIMPORTXML"), ACRX_T("FPIMPORTXML"), ACRX_CMD_TRANSPARENT, fpImportXML);
 
     qDebug() << "init ok";
+
+    QString cuixFileName = CadastrTools::path + "/CadastrTools.cuix";
+    if(QFile::exists(cuixFileName)) {
+        ads_queueexpr(L"(command \"_.cuiunload\" \"CadastrTools\") ");
+        ads_queueexpr(L"(command \"FILEDIA\" \"0\") ");
+
+        QString cmd = "(command \"_.cuiload\" \"" + cuixFileName + "\") ";
+        ACHAR cmdBuf[MAX_PATH + 256] = { 0 };
+        cmd.toWCharArray(cmdBuf);
+
+        ads_queueexpr(cmdBuf);
+        ads_queueexpr(L"(command \"FILEDIA\" \"1\") ");
+    }
 }
 
 // Clean up function called in acrxEntryPoint during the
